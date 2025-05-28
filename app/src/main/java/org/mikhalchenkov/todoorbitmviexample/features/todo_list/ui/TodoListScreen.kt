@@ -29,28 +29,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.mikhalchenkov.mytodoapp.features.todo_list.ui.TodoItem
 import org.mikhalchenkov.todoorbitmviexample.features.todo_list.state.TodoViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.collections.immutable.ImmutableList
+import org.mikhalchenkov.todoorbitmviexample.core.domain.entity.Todo
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 fun TodoListScreen(viewModel: TodoViewModel = hiltViewModel()) {
-    val state by store.collectAsState()
+    val state = viewModel.collectAsState().value
+
     var newTodoText by remember { mutableStateOf("") }
 
-    val rememberedOnToggleTodo = remember(store) {
-        { id: Long ->
-            store.accept(TodoListIntent.ToggleTodo(id))
-        }
-    }
-
-    val rememberedOnDeleteTodo = remember(store) {
-        { id: Long ->
-            store.accept(TodoListIntent.DeleteTodo(id))
-        }
-    }
-
-    val rememberedOnAddTodo = remember(store) {
+    val rememberedOnAddTodo = remember(state) {
         {
             if (newTodoText.isNotBlank()) {
-                store.accept(TodoListIntent.AddTodo(newTodoText))
+                viewModel.addTodo(newTodoText)
                 newTodoText = ""
             }
         }
@@ -82,15 +75,15 @@ fun TodoListScreen(viewModel: TodoViewModel = hiltViewModel()) {
         when {
             state.isLoading -> LoadingContent()
             state.error != null -> MessageContent(
-                state.error ?: "Something was wrong",
+                state.error,
                 isError = true
             )
 
             state.todos.isEmpty() -> MessageContent("Nothing to show yet, add your first task!")
             else -> TodoListContent(
                 state.todos,
-                onToggleTodo = rememberedOnToggleTodo,
-                onDeleteTodo = rememberedOnDeleteTodo,
+                onToggleTodo = viewModel::toggleTodo,
+                onDeleteTodo = viewModel::deleteTodo,
                 modifier = Modifier.fillMaxSize()
             )
         }

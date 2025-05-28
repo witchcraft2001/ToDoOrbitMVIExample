@@ -3,7 +3,7 @@ package org.mikhalchenkov.todoorbitmviexample.features.todo_list.state
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.mikhalchenkov.todoorbitmviexample.core.domain.entity.Todo
+import kotlinx.collections.immutable.toImmutableList
 import org.mikhalchenkov.todoorbitmviexample.core.domain.repository.TodoRepository
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -37,7 +37,7 @@ class TodoViewModel @Inject constructor(
 
             reduce {
                 state.copy(
-                    todos = state.todos + newTodo,
+                    todos = (state.todos + newTodo).toImmutableList(),
                     isLoading = false,
                     newTodoText = ""
                 )
@@ -69,7 +69,7 @@ class TodoViewModel @Inject constructor(
                     error = null,
                     todos = state.todos.map { todo ->
                         if (todo.id == todoId) updatedTodo else todo
-                    }
+                    }.toImmutableList()
                 )
             }
         } catch (e: Exception) {
@@ -85,50 +85,21 @@ class TodoViewModel @Inject constructor(
         try {
             todoRepository.deleteTodo(todoId)
             reduce {
-                state.copy(isLoading = true)
+                state.copy(
+                    isLoading = false,
+                    todos = state.todos.filterNot { it.id == todoId }.toImmutableList(),
+                )
             }
         } catch (e: Exception) {
             handleError(e)
         }
-    }
-
-    fun updateNewTodoText(text: String) = intent {
-        reduce { state.copy(newTodoText = text) }
-    }
-
-    fun setFilter(filter: TodoFilter) = intent {
-        reduce { state.copy(filter = filter) }
-    }
-
-    fun clearCompleted() = intent {
-        val completedTodos = state.todos.filter { it.isCompleted }
-
-        reduce {
-            state.copy(todos = state.todos.filterNot { it.isCompleted })
-        }
-
-        try {
-            completedTodos.forEach { todo ->
-                todoRepository.deleteTodo(todo.id)
-            }
-        } catch (e: Exception) {
-            // Revert state on error
-            reduce {
-                state.copy(todos = state.todos + completedTodos)
-            }
-            handleError(e)
-        }
-    }
-
-    fun retryLoading() = intent {
-        loadTodos()
     }
 
     private fun loadTodos() = intent {
         reduce { state.copy(isLoading = true, error = null) }
 
         try {
-            val todos = todoRepository.getTodos()
+            val todos = todoRepository.getTodos().toImmutableList()
             reduce {
                 state.copy(todos = todos, isLoading = false)
             }
@@ -143,11 +114,4 @@ class TodoViewModel @Inject constructor(
         }
         postSideEffect(TodoSideEffect.ShowError(exception.message ?: "Unknown error"))
     }
-
-    val filteredTodos: List<Todo>
-        get() = when (container.stateFlow.value.filter) {
-            TodoFilter.ALL -> container.stateFlow.value.todos
-            TodoFilter.ACTIVE -> container.stateFlow.value.todos.filter { !it.isCompleted }
-            TodoFilter.COMPLETED -> container.stateFlow.value.todos.filter { it.isCompleted }
-        }
 }

@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.orbitmvi.viewmodel)
     implementation(libs.orbitmvi.compose)
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.kotlinx.collections.immutable)
     kapt(libs.hilt.android.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
