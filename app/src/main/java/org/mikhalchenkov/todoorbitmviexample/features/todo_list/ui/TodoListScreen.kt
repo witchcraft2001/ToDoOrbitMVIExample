@@ -1,5 +1,6 @@
 package org.mikhalchenkov.todoorbitmviexample.features.todo_list.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,17 +27,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import org.mikhalchenkov.mytodoapp.features.todo_list.ui.TodoItem
 import org.mikhalchenkov.todoorbitmviexample.features.todo_list.state.TodoViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import org.mikhalchenkov.todoorbitmviexample.core.domain.entity.Todo
+import org.mikhalchenkov.todoorbitmviexample.features.todo_list.state.TodoSideEffect
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun TodoListScreen(viewModel: TodoViewModel = hiltViewModel()) {
     val state = viewModel.collectAsState().value
+    val context = LocalContext.current
+
+    viewModel.collectSideEffect { effect ->
+        when (effect) {
+            is TodoSideEffect.ShowMessage -> {
+                Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+            }
+        }
+
+    }
 
     var newTodoText by remember { mutableStateOf("") }
 

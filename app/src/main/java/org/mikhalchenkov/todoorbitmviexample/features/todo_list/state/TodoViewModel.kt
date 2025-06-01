@@ -26,7 +26,7 @@ class TodoViewModel @Inject constructor(
 
     fun addTodo(text: String) = intent {
         if (text.isBlank()) {
-            postSideEffect(TodoSideEffect.ShowError("Todo text cannot be empty"))
+            postSideEffect(TodoSideEffect.ShowMessage("Todo text cannot be empty"))
             return@intent
         }
 
@@ -43,8 +43,7 @@ class TodoViewModel @Inject constructor(
                 )
             }
 
-            postSideEffect(TodoSideEffect.ShowAddTodoSuccess)
-            postSideEffect(TodoSideEffect.HideKeyboard)
+            postSideEffect(TodoSideEffect.ShowMessage("Todo added successfully"))
         } catch (e: Exception) {
             handleError(e)
         }
@@ -112,6 +111,6 @@ class TodoViewModel @Inject constructor(
         reduce {
             state.copy(isLoading = false, error = exception.message)
         }
-        postSideEffect(TodoSideEffect.ShowError(exception.message ?: "Unknown error"))
+        postSideEffect(TodoSideEffect.ShowMessage(exception.message ?: "Unknown error"))
     }
 }
