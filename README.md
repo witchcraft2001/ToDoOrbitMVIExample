@@ -1,6 +1,6 @@
 # ToDoOrbitMVIExample
 
-A minimalist Android application template demonstrating the use of OrbitMVI and modern development practices.
+A minimalist Android application template demonstrating the use of OrbitMVI and modern development practices, based on [Medium article](https://medium.com/@mikhaltchenkov/orbit-mvi-a-complete-guide-to-the-state-management-framework-39c28e05cdd3).
 
 ![ToDoOrbitMVIExample](./screenshots/screenshot1.png)
 
