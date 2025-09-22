@@ -39,7 +39,6 @@ class TodoViewModel @Inject constructor(
                 state.copy(
                     todos = (state.todos + newTodo).toImmutableList(),
                     isLoading = false,
-                    newTodoText = ""
                 )
             }
 

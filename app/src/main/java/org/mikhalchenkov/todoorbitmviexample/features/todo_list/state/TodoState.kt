@@ -11,5 +11,4 @@ data class TodoState (
     val todos: ImmutableList<Todo> = persistentListOf(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val newTodoText: String = "",
 ): Parcelable
